@@ -11,8 +11,8 @@ package domineering;
  */
 
 public class DomineeringMove {
-	private int x;
-	private int y;
+	private final int x;
+	private final int y;
 	//TODO could add x2 & y2 yet it may be better to use cleverness to avoid excessive data
 
 	/**	
@@ -32,5 +32,25 @@ public class DomineeringMove {
 
 	public int getY() {
 		return y;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof DomineeringMove)){
+			return false;
+		}
+		else{
+			return ((DomineeringMove) o).getX() == x && ((DomineeringMove) o).getY() == y;
+		}
+	}
+	
+	@Override
+	public int hashCode(){
+		return x+2*y;
+	}
+	
+	@Override
+	public String toString(){
+		return Integer.toString(x) + ", " + Integer.toBinaryString(y);
 	}
 }
