@@ -12,7 +12,7 @@ public class CommandLineDomineering{
 		public DomineeringMove getMove() {
 			String input = System.console().readLine("Enter your move: ");
 			assert(input.length() == 3);//Input format: x y
-			return new DomineeringMove(Character.getNumericValue(input.charAt(0)), Character.getNumericValue(input.charAt(1)));
+			return new DomineeringMove(Character.getNumericValue(input.charAt(0)), Character.getNumericValue(input.charAt(2)));
 		}
 
 		public void giveMove(DomineeringMove move) {
@@ -29,10 +29,9 @@ public class CommandLineDomineering{
 	  }
 
 	public static void main(String [] args) {
-	    DomineeringBoard board = new DomineeringBoard(true ,Integer.parseInt(args[0]), Integer.parseInt(args[1]));//PLayerH Starts
-	     // board.tree().firstPlayer(new CommandLineTTT());
-	    board.tree().secondPlayer(new CommandLineDom());
+		//String [] args = {"2","2"};
+	    DomineeringBoard board = new DomineeringBoard(true, Integer.parseInt(args[0]), Integer.parseInt(args[1]));//PLayerH Starts
+	   board.tree().firstPlayer(new CommandLineDom());
+	     // board.tree().secondPlayer(new CommandLineDom());
 	  }
-
-
 }

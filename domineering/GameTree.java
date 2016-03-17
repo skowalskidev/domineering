@@ -87,8 +87,10 @@ public class GameTree<Move> {
       c.end(board.value());
     } 
     else {
-      Move m = c.getMove();
-      assert(children.containsKey(m));
+      Move m = c.getMove();//Get move from player2(console)
+      if(!children.containsKey(m))
+    	  System.exit(1);
+      //assert(children.containsKey(m));
       children.get(m).firstPlayer(c);
     }
   }

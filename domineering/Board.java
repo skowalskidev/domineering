@@ -21,7 +21,7 @@ public abstract class Board<Move> {
                      new LinkedHashMap<Move,GameTree<Move>>(), 
                      value());
     else
-      return (nextPlayer() == Player.MAXIMIZER ? maxTree() : minTree()); 
+      return (nextPlayer() == Player.MAXIMIZER ? maxTree() : minTree());
   }
 
   // Two helper methods for that, which call the above method tree:
