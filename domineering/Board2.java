@@ -21,6 +21,10 @@ public abstract class Board2<Move> {
 	public GameTree2<Move> maxTree() {//Player maximiser
 		assert (!availableMoves().isEmpty());
 
+		/*
+		 * TODO Calculate the tree after the first move to effectively cut down the number of comparisoons to 1/3
+		 * */
+		
 		int optimalOutcome = Integer.MIN_VALUE;
 		LinkedHashMap<Move, GameTree2<Move>> children = new LinkedHashMap<Move, GameTree2<Move>>();
 
