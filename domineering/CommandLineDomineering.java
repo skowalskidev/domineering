@@ -30,7 +30,7 @@ public class CommandLineDomineering{
 
 	public static void main(String [] args) {
 		//String [] args = {"2","2"};
-	    DomineeringBoard board = new DomineeringBoard(true, Integer.parseInt(args[0]), Integer.parseInt(args[1]));//PLayerH Starts
+	    DomineeringBoard board = new DomineeringBoard(true ,true, Integer.parseInt(args[0]), Integer.parseInt(args[1]));//PLayerH Starts
 	   board.tree().firstPlayer(new CommandLineDom());
 	     // board.tree().secondPlayer(new CommandLineDom());
 	  }

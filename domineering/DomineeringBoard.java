@@ -3,7 +3,7 @@ package domineering;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DomineeringBoard extends Board<DomineeringMove> {
+public class DomineeringBoard extends Board2<DomineeringMove> {
 
 	private static Player playerV;
 	private static Player playerH;
@@ -14,25 +14,26 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 	private final HashSet<DomineeringMove> availablePlayerHMovesSet;
 	private final HashSet<DomineeringMove> availablePlayerVMovesSet;
 
-	// Board representation as bool 2d array true - taken, false - free space
-	private boolean board[][];
+	// Board2 representation as bool 2d array true - taken, false - free space
+	private boolean Board2[][];
 	private int width;
 	private int height;
 
 	//private boolean playerHTurn;
-	private boolean playerHStarts;
+	private boolean maximiserStarts;
+	private boolean playerHMaximiser;
 	
 	/**
-	 * Create a new, empty board
+	 * Create a new, empty Board2
 	 * 
 	 * @param width
 	 * @param height
 	 */
-	public DomineeringBoard(boolean playerHStarts, int width, int height) {
-		//playerHTurn = playerHStarts; //The opposite so that when nextPlayer is called after the game starts the appropriate player will begin
-		setPlayerStatuses(playerHStarts);
+	public DomineeringBoard(boolean maximiserStarts, boolean playerHMaximiser, int width, int height) {
+		//playerHTurn = playerHMaximiser; //The opposite so that when nextPlayer is called after the game starts the appropriate player will begin
+		setPlayerStatuses(maximiserStarts, playerHMaximiser);
 		
-		board = new boolean[width][height];
+		Board2 = new boolean[width][height];
 		this.width = width;
 		this.height = height;
 
@@ -43,11 +44,11 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 	}
 
 	/**
-	 * Create the board Used for creating new states i.e. moves
+	 * Create the Board2 Used for creating new states i.e. moves
 	 * 
 	 * @param playerVMovesSet
 	 * @param playerHMovesSet
-	 * @param board
+	 * @param Board2
 	 * @param width
 	 * @param height
 	 * @param moveX1
@@ -55,13 +56,13 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 	 * @param moveX2
 	 * @param moveY2
 	 */
-	private DomineeringBoard(boolean playerHStarts, HashSet<DomineeringMove> availablePlayerHMovesSet,HashSet<DomineeringMove> availablePlayerVMovesSet, boolean[][] board, int width, int height, DomineeringMove move) {
-		setPlayerStatuses(playerHStarts);
+	private DomineeringBoard(boolean maximiserStarts, boolean playerHMaximiser, HashSet<DomineeringMove> availablePlayerHMovesSet,HashSet<DomineeringMove> availablePlayerVMovesSet, boolean[][] Board2, int width, int height, DomineeringMove move) {
+		setPlayerStatuses(maximiserStarts, playerHMaximiser);
 		
 		this.availablePlayerHMovesSet = availablePlayerHMovesSet;
 		this.availablePlayerVMovesSet = availablePlayerVMovesSet;
 
-		this.board = board;
+		this.Board2 = Board2;
 		this.width = width;
 		this.height = height;
 		
@@ -73,8 +74,8 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 		int moveY = move.getY();
 		
 		if (nextPlayer() == playerH) {
-			board[moveX][moveY] = true;// Add new move
-			board[moveX + 1][moveY] = true;
+			Board2[moveX][moveY] = true;// Add new move
+			Board2[moveX + 1][moveY] = true;
 			
 			availablePlayerHMovesSet.remove(new DomineeringMove(moveX - 1, moveY));//Remove move to the left
 			availablePlayerHMovesSet.remove(new DomineeringMove(moveX + 1, moveY));//Remove move to the right
@@ -87,8 +88,8 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 			assert(availablePlayerHMovesSet.contains(new DomineeringMove(moveX + 1, moveY)) == false);//availablePlayerHMovesSet contains taken second dominoe half?
 			assert(availablePlayerVMovesSet.contains(new DomineeringMove(moveX + 1, moveY)) == false);//availablePlayerVMovesSet contains taken second dominoe half?
 		} else {
-			board[moveX][moveY] = true;// Add new move
-			board[moveX][moveY + 1] = true;
+			Board2[moveX][moveY] = true;// Add new move
+			Board2[moveX][moveY + 1] = true;
 			
 			availablePlayerVMovesSet.remove(new DomineeringMove(moveX, moveY - 1));
 			availablePlayerVMovesSet.remove(new DomineeringMove(moveX, moveY + 1));
@@ -110,9 +111,11 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 		assert(availablePlayerVMovesSet.contains(move) == false);//availablePlayerVMovesSet contains taken first dominoe half?
 	}
 	
-	private void setPlayerStatuses(boolean playerHStarts){
-		this.playerHStarts = playerHStarts;
-		if(playerHStarts){
+	private void setPlayerStatuses(boolean maximiserStarts, boolean playerHMaximiser){
+		this.maximiserStarts = maximiserStarts;
+		this.playerHMaximiser = playerHMaximiser;
+		
+		if(playerHMaximiser){
 			playerH = Player.MAXIMIZER;
 			playerV = Player.MINIMIZER;
 		}
@@ -128,16 +131,48 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 		int noOfOccupiedSpaces = 0;
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				if(board[i][j])
+				if(Board2[i][j])
 					noOfOccupiedSpaces++;
 			}
 		}
 
-		if(noOfOccupiedSpaces % 4  == 0) {
-			return playerHStarts ? playerH : playerV;//First player
+		if(noOfOccupiedSpaces % 4  == 0) {//Maximiser does not always start first
+			if(playerHMaximiser){
+				if(maximiserStarts){
+					return playerH;
+				}
+				else {
+					return playerV;
+				}
+			}
+			else {
+				if(maximiserStarts){
+					return playerV;
+				}
+				else {
+					return playerH;
+				}
+			}
+			//return playerHMaximiser ? playerH : playerV;//First player
 		}
 		else{
-			return playerHStarts ? playerV : playerH;//Second player
+			if(playerHMaximiser){
+				if(maximiserStarts){
+					return playerV;
+				}
+				else {
+					return playerH;
+				}
+			}
+			else {
+				if(maximiserStarts){
+					return playerH;
+				}
+				else {
+					return playerV;
+				}
+			}
+			//return playerHMaximiser ? playerV : playerH;//Second player
 		}
 	}
 
@@ -149,13 +184,13 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 	void setUpAvailableMoves() {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				/*if (board[i][j]) {// Any move not possible at this position
+				/*if (Board2[i][j]) {// Any move not possible at this position
 					continue;
-				}*/ //Not Required if board is always clean at the start
-				if (i + 1 < width && !board[i + 1][j]) {// Add playerHMove on this position
+				}*/ //Not Required if Board2 is always clean at the start
+				if (i + 1 < width && !Board2[i + 1][j]) {// Add playerHMove on this position
 					availablePlayerHMovesSet.add(new DomineeringMove(i, j));
 				}
-				if (j + 1 < height && !board[i][j + 1]) {// Add playerVMove on this position
+				if (j + 1 < height && !Board2[i][j + 1]) {// Add playerVMove on this position
 					availablePlayerVMovesSet.add(new DomineeringMove(i, j));
 				}
 			}
@@ -168,19 +203,19 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 	 * 
 	 * @return
 	 */
-	int value() {// playerH(Maximizer) won(1) lost (-1)
+	int value() {// Maximizer won(1) lost (-1)
 		//assert (nextPlayer() == Player.MINIMIZER);// Only maximiser calls this?
 		if(availablePlayerHMovesSet.size() > 0 && availablePlayerVMovesSet.size() > 0) {
 			return 0;
 		}
 		else if(nextPlayer() == playerH){
-			if(playerHStarts && availablePlayerHMovesSet.size() == 0){
+			if(playerHMaximiser && availablePlayerHMovesSet.size() == 0){
 				return -1;
 			}
 			return 1;
 		}
 		else{
-			if(playerHStarts && availablePlayerVMovesSet.size() == 0){
+			if(playerHMaximiser && availablePlayerVMovesSet.size() == 0){
 				return 1;
 			}
 			return -1;
@@ -205,24 +240,24 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	Board<DomineeringMove> play(DomineeringMove move) {
-		boolean newBoardRep[][] = deepCopyBoard();
-		Board<DomineeringMove> tempBoard = new DomineeringBoard(playerHStarts, (HashSet<DomineeringMove>) availablePlayerHMovesSet.clone(), (HashSet<DomineeringMove>) availablePlayerVMovesSet.clone(), newBoardRep, width, height, move);
+	Board2<DomineeringMove> play(DomineeringMove move) {
+		boolean newBoard2Rep[][] = deepCopyBoard2();
+		Board2<DomineeringMove> tempBoard2 = new DomineeringBoard(maximiserStarts, playerHMaximiser, (HashSet<DomineeringMove>) availablePlayerHMovesSet.clone(), (HashSet<DomineeringMove>) availablePlayerVMovesSet.clone(), newBoard2Rep, width, height, move);
 		
 		assert(this.availableMoves().contains(move));//this contains move(not mutated) 
-		assert(!tempBoard.availableMoves().contains(move));
+		assert(!tempBoard2.availableMoves().contains(move));
 
-		return tempBoard;
+		return tempBoard2;
 	}
 	
-	private boolean[][] deepCopyBoard() {
-		boolean newBoardRep[][] = new boolean[width][height];
+	private boolean[][] deepCopyBoard2() {
+		boolean newBoard2Rep[][] = new boolean[width][height];
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				newBoardRep[i][j] = board[i][j];
+				newBoard2Rep[i][j] = Board2[i][j];
 			}
 		}
-		return newBoardRep;
+		return newBoard2Rep;
 	}
 	
 	/*private HashSet<DomineeringMove> deepCopyHashSet(HashSet<DomineeringMove> original){
@@ -243,7 +278,7 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 		String thisString = "";
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				thisString += board[x][y] ? "|-|" : x + "," + y;
+				thisString += Board2[x][y] ? "|-|" : x + "," + y;
 				thisString += " ";
 			}
 			thisString += '\n';

@@ -1,16 +1,16 @@
 package domineering;
 
-import java.util.*;
+import java.util.Map;
 
-public class GameTree<Move> {
-	private final Board<Move> board;
-	private final Map<Move, GameTree<Move>> children;
+public class GameTree2<Move> {
+	private final Board2<Move> Board2;
+	private final Map<Move, GameTree2<Move>> children;
 	private final int optimalOutcome;
 
-	public GameTree(Board<Move> board, Map<Move, GameTree<Move>> children, int optimalOutcome) {
+	public GameTree2(Board2<Move> Board2, Map<Move, GameTree2<Move>> children, int optimalOutcome) {
 
-		assert (board != null && children != null);
-		this.board = board;
+		assert (Board2 != null && children != null);
+		this.Board2 = Board2;
 		this.children = children;
 		this.optimalOutcome = optimalOutcome;
 	}
@@ -20,11 +20,11 @@ public class GameTree<Move> {
 	}
 
 	// Getter methods:
-	public Board<Move> board() {
-		return board;
+	public Board2<Move> Board2() {
+		return Board2;
 	}
 
-	public Map<Move, GameTree<Move>> children() {
+	public Map<Move, GameTree2<Move>> children() {
 		return children;
 	}
 
@@ -38,7 +38,7 @@ public class GameTree<Move> {
 	// Number of tree nodes:
 	public int size() {
 		int size = 1;
-		for (Map.Entry<Move, GameTree<Move>> child : children.entrySet()) {
+		for (Map.Entry<Move, GameTree2<Move>> child : children.entrySet()) {
 			size += child.getValue().size();
 		}
 		return size;
@@ -47,7 +47,7 @@ public class GameTree<Move> {
 	// We take the height of a leaf to be zero (rather than -1):
 	public int height() {
 		int height = -1;
-		for (Map.Entry<Move, GameTree<Move>> e : children.entrySet()) {
+		for (Map.Entry<Move, GameTree2<Move>> e : children.entrySet()) {
 			height = Math.max(height, e.getValue().height());
 		}
 		return 1 + height;
@@ -55,14 +55,14 @@ public class GameTree<Move> {
 
 	// Plays first using this tree:
 	public void firstPlayer(MoveChannel<Move> c) {
-		c.comment(board + "\nThe optimal outcome is " + optimalOutcome);
+		c.comment(Board2 + "\nThe optimal outcome is " + optimalOutcome);
 
 		if (isLeaf()) {
-			assert (optimalOutcome == board.value());
-			c.end(board.value());
+			assert (optimalOutcome == Board2.value());
+			c.end(Board2.value());
 		} else {
-			Map.Entry<Move, GameTree<Move>> optimalEntry = null;
-			for (Map.Entry<Move, GameTree<Move>> child : children.entrySet()) {
+			Map.Entry<Move, GameTree2<Move>> optimalEntry = null;
+			for (Map.Entry<Move, GameTree2<Move>> child : children.entrySet()) {
 				if (optimalOutcome == child.getValue().optimalOutcome) {
 					optimalEntry = child;
 					break;
@@ -76,11 +76,11 @@ public class GameTree<Move> {
 
 	// Plays second using this tree:
 	public void secondPlayer(MoveChannel<Move> c) {
-		c.comment(board + "\nThe optimal outcome is " + optimalOutcome);
+		c.comment(Board2 + "\nThe optimal outcome is " + optimalOutcome);
 
 		if (isLeaf()) {
-			assert (optimalOutcome == board.value());
-			c.end(board.value());
+			assert (optimalOutcome == Board2.value());
+			c.end(Board2.value());
 		} else {
 			Move m = c.getMove();//Get move from player2(console)
 			if (!children.containsKey(m))
