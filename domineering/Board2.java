@@ -22,7 +22,7 @@ public abstract class Board2<Move> {
 		assert (!availableMoves().isEmpty());
 
 		/*
-		 * TODO Calculate the tree after the first move to effectively cut down the number of comparisoons to 1/3
+		 * TODO Calculate the tree after the first move to effectively cut down the number of comparisoons to 1/(width * height)
 		 * */
 		
 		int optimalOutcome = Integer.MIN_VALUE;
@@ -44,7 +44,7 @@ public abstract class Board2<Move> {
 
 		int optimalOutcome = Integer.MAX_VALUE;
 		LinkedHashMap<Move, GameTree2<Move>> children = new LinkedHashMap<Move, GameTree2<Move>>();
-
+		
 		for (Move m : availableMoves()) {
 			GameTree2<Move> subtree = play(m).tree();//Gets tree up to leaf with the outcome value of leaves from this tree
 			children.put(m, subtree);

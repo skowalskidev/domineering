@@ -6,7 +6,7 @@ package domineering;
  *
  */
 public class BlackBoxDomineering2 {
-	private static class CommandLineDom implements MoveChannel<DomineeringMove> {
+	public static class CommandLineDom implements MoveChannel<DomineeringMove> {
 		@Override
 		public DomineeringMove getMove() {
 			String input = System.console().readLine("Enter your move: ");
@@ -25,6 +25,18 @@ public class BlackBoxDomineering2 {
 		public void end(int value) {
 			System.out.println("Game over. The result is " + value);
 		}
+	}
+	
+	/**
+	 * Wait for player to move & calculate the tree after the first move to effectively cut down the number of comparisoons to 1/(width * height) of original
+	 * @param board
+	 * @param consolePlayer
+	 */
+	private static void letOpponentMove(DomineeringBoard board){
+		CommandLineDom consolePlayer = new CommandLineDom();
+		DomineeringMove m = consolePlayer.getMove();//Get move from player2(console)
+		board = (DomineeringBoard) board.play(m);
+		board.tree().firstPlayer(consolePlayer);
 	}
 
 	public static void main(String[] args) {
@@ -47,15 +59,21 @@ public class BlackBoxDomineering2 {
 						System.exit(1);	
 				}
 			break;
-			case "second":
+			case "second"://User starts so wait for first move THEN calculate possibilities
 				switch(args[1]){
 					case "horizontal":
 						board = new DomineeringBoard(false, true, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
-						board.tree().secondPlayer(new CommandLineDom());
+						//board.tree().secondPlayer(new CommandLineDom());
+						
+						//opponent moves first
+						letOpponentMove(board);
 					break;
 					case "vertical":
 						board = new DomineeringBoard(false, false, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
-						board.tree().secondPlayer(new CommandLineDom());
+						//board.tree().secondPlayer(new CommandLineDom());
+						
+						//opponent moves first
+						letOpponentMove(board);
 						break;
 					default:
 						System.exit(1);	
