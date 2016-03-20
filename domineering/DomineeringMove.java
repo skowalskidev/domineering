@@ -51,6 +51,6 @@ public class DomineeringMove {
 	
 	@Override
 	public String toString(){
-		return Integer.toString(x) + ", " + Integer.toBinaryString(y);
+		return Integer.toString(x) + ", " + Integer.toString(y);
 	}
 }
