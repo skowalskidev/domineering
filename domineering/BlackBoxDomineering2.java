@@ -61,9 +61,9 @@ public class BlackBoxDomineering2 {
 						// PLayerH starts
 						board = playOptimally(width, height) ? new DomineeringBoard2(-1, true, true, width, height) : new DomineeringBoard2(exploredLimit, true, true, width, height);
 						//System.out.println("Benchmark Started making first board");
-						long time = System.currentTimeMillis();
-						board.tree(0);
-						time = System.currentTimeMillis() - time;
+						//long time = System.currentTimeMillis();
+						//board.tree(0);
+						//time = System.currentTimeMillis() - time;
 						//System.out.println("Benchmark Finished making first board");
 						//System.out.println("Benchmark time " + time);
 						
