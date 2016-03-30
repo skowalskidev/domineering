@@ -1,4 +1,4 @@
-package domineering;
+
 
 
 interface MoveChannel<Move> {

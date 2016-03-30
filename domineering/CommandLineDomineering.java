@@ -1,4 +1,4 @@
-package domineering;
+
 
 /**
  * Usage java CommandLineDomineering boardWidth boardHeight

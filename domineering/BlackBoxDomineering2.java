@@ -1,4 +1,4 @@
-package domineering;
+
 
 /**
  * TODO Change to proper BBD2 temporarily this is used for testing

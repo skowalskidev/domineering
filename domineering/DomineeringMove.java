@@ -1,4 +1,4 @@
-package domineering;
+
 
 /**
  * Represents moves on the board as int positions e.g. top left move = 0,0

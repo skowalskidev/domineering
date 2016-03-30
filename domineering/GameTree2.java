@@ -1,4 +1,4 @@
-package domineering;
+
 
 import java.util.Map;
 
