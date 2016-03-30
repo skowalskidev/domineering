@@ -1,4 +1,4 @@
-
+import java.util.Scanner;
 
 /**
  * TODO Change to proper BBD2 temporarily this is used for testing
@@ -12,15 +12,17 @@ public class BlackBoxDomineering2 {
 	private final static int exploredLimit = 3;
 	
 	public static class CommandLineDom implements MoveChannel<DomineeringMove> {
+		Scanner scanner = new Scanner(System.in);
 		@Override
 		public DomineeringMove getMove() {
-			String input = System.console().readLine();//"Enter your move: "
+			String input = scanner.nextLine();//Enter your move
 			assert (input.length() == 3);//Input format: x y
 			return new DomineeringMove(Character.getNumericValue(input.charAt(0)), Character.getNumericValue(input.charAt(2)));
 		}
 
 		public void giveMove(DomineeringMove move) {
 			System.out.println(move);
+			System.out.flush();
 		}
 
 		public void comment(String msg) {
@@ -29,6 +31,7 @@ public class BlackBoxDomineering2 {
 
 		public void end(int value) {
 			//System.out.println("Game over. The result is " + value);
+			System.exit(0);
 		}
 	}
 	
