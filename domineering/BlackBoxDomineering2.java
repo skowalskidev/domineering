@@ -14,21 +14,21 @@ public class BlackBoxDomineering2 {
 	public static class CommandLineDom implements MoveChannel<DomineeringMove> {
 		@Override
 		public DomineeringMove getMove() {
-			String input = System.console().readLine("Enter your move: ");
+			String input = System.console().readLine();//"Enter your move: "
 			assert (input.length() == 3);//Input format: x y
 			return new DomineeringMove(Character.getNumericValue(input.charAt(0)), Character.getNumericValue(input.charAt(2)));
 		}
 
 		public void giveMove(DomineeringMove move) {
-			System.out.println("I play " + move);
+			System.out.println(move);
 		}
 
 		public void comment(String msg) {
-			System.out.println(msg);
+			//System.out.println(msg);
 		}
 
 		public void end(int value) {
-			System.out.println("Game over. The result is " + value);
+			//System.out.println("Game over. The result is " + value);
 		}
 	}
 	
@@ -57,14 +57,14 @@ public class BlackBoxDomineering2 {
 					case "horizontal":
 						// PLayerH starts
 						board = playOptimally(width, height) ? new DomineeringBoard(-1, true, true, width, height) : new DomineeringBoard(exploredLimit, true, true, width, height);
-						System.out.println("Benchmark Started making first board");
+						//System.out.println("Benchmark Started making first board");
 						long time = System.currentTimeMillis();
 						board.tree(0);
 						time = System.currentTimeMillis() - time;
-						System.out.println("Benchmark Finished making first board");
-						System.out.println("Benchmark time " + time);
+						//System.out.println("Benchmark Finished making first board");
+						//System.out.println("Benchmark time " + time);
 						
-						System.out.println("Now making board for playing from scratch");
+						//System.out.println("Now making board for playing from scratch");
 						board.tree(0).firstPlayer(new CommandLineDom());
 						break;
 					case "vertical":
