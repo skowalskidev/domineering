@@ -38,7 +38,10 @@ public class DomineeringBoard extends Board<DomineeringMove> {
 	 * @param width
 	 * @param height
 	 */
-	public DomineeringBoard(boolean maximiserStarts, boolean playerHMaximiser, int width, int height) {
+	public DomineeringBoard(int width, int height) {
+		boolean maximiserStarts = true;
+		boolean playerHMaximiser = true;
+		
 		setPlayerStatuses(maximiserStarts, playerHMaximiser);
 		
 		Board = new boolean[width][height];

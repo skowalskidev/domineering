@@ -41,11 +41,11 @@ public class BlackBoxDomineering {
 			case "first":
 				switch(args[1]){
 					case "horizontal":
-						board = new DomineeringBoard(true, true, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
+						board = new DomineeringBoard(Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
 						board.tree().firstPlayer(new CommandLineDom());
 					break;
 					case "vertical":
-						board = new DomineeringBoard(true, false, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
+						board = new DomineeringBoard(Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
 						board.tree().firstPlayer(new CommandLineDom());
 						break;
 					default:
@@ -55,11 +55,11 @@ public class BlackBoxDomineering {
 			case "second":
 				switch(args[1]){
 					case "horizontal":
-						board = new DomineeringBoard(false, true, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
+						board = new DomineeringBoard(Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
 						board.tree().secondPlayer(new CommandLineDom());
 					break;
 					case "vertical":
-						board = new DomineeringBoard(false, false, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
+						board = new DomineeringBoard(Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
 						board.tree().secondPlayer(new CommandLineDom());
 						break;
 					default:
