@@ -37,17 +37,17 @@ public class BlackBoxDomineering2 {
 	 * @param board
 	 * @param consolePlayer
 	 */
-	private static void letOpponentMove(DomineeringBoard board){
+	private static void letOpponentMove(DomineeringBoard2 board){
 		CommandLineDom consolePlayer = new CommandLineDom();
 		DomineeringMove m = consolePlayer.getMove();//Get move from player2(console)
-		board = (DomineeringBoard) board.play(m);
+		board = (DomineeringBoard2) board.play(m);
 		board.tree(0).firstPlayer(consolePlayer);
 	}
 
 	public static void main(String[] args) {
 		assert (args.length == 4);
 
-		DomineeringBoard board;
+		DomineeringBoard2 board;
 		int width = Integer.parseInt(args[2]);
 		int height = Integer.parseInt(args[3]);
 		
@@ -56,7 +56,7 @@ public class BlackBoxDomineering2 {
 				switch(args[1]){
 					case "horizontal":
 						// PLayerH starts
-						board = playOptimally(width, height) ? new DomineeringBoard(-1, true, true, width, height) : new DomineeringBoard(exploredLimit, true, true, width, height);
+						board = playOptimally(width, height) ? new DomineeringBoard2(-1, true, true, width, height) : new DomineeringBoard2(exploredLimit, true, true, width, height);
 						//System.out.println("Benchmark Started making first board");
 						long time = System.currentTimeMillis();
 						board.tree(0);
@@ -68,7 +68,7 @@ public class BlackBoxDomineering2 {
 						board.tree(0).firstPlayer(new CommandLineDom());
 						break;
 					case "vertical":
-						board = playOptimally(width, height) ? new DomineeringBoard(-1, true, false, width, height) : new DomineeringBoard(exploredLimit, true, false, width, height);// PLayerH starts
+						board = playOptimally(width, height) ? new DomineeringBoard2(-1, true, false, width, height) : new DomineeringBoard2(exploredLimit, true, false, width, height);// PLayerH starts
 						board.tree(0).firstPlayer(new CommandLineDom());
 						break;
 					default:
@@ -78,13 +78,13 @@ public class BlackBoxDomineering2 {
 			case "second"://User starts so wait for first move THEN calculate possibilities
 				switch(args[1]){
 					case "horizontal":
-						board = playOptimally(width, height) ? new DomineeringBoard(-1, false, true, width, height) : new DomineeringBoard(exploredLimit, false, true, width, height);// PLayerH starts
+						board = playOptimally(width, height) ? new DomineeringBoard2(-1, false, true, width, height) : new DomineeringBoard2(exploredLimit, false, true, width, height);// PLayerH starts
 						
 						//opponent moves first
 						letOpponentMove(board);
 					break;
 					case "vertical":
-						board = playOptimally(width, height) ? new DomineeringBoard(-1, false, false, width, height) : new DomineeringBoard(exploredLimit, false, false, width, height);// PLayerH starts
+						board = playOptimally(width, height) ? new DomineeringBoard2(-1, false, false, width, height) : new DomineeringBoard2(exploredLimit, false, false, width, height);// PLayerH starts
 						
 						//opponent moves first
 						letOpponentMove(board);
