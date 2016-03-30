@@ -1,4 +1,4 @@
-package domineering;
+/*package domineering;
 
 import java.util.Scanner;
 
@@ -70,4 +70,4 @@ public class BlackBoxDomineering {
 				System.exit(1);	
 		}
 	}
-}
+}*/

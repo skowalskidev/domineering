@@ -6,6 +6,11 @@ package domineering;
  *
  */
 public class BlackBoxDomineering2 {
+	/**
+	 * -1 when playing optimally > 0 when using heuristic pruning
+	 */
+	private final static int exploredLimit = 3;
+	
 	public static class CommandLineDom implements MoveChannel<DomineeringMove> {
 		@Override
 		public DomineeringMove getMove() {
@@ -36,24 +41,35 @@ public class BlackBoxDomineering2 {
 		CommandLineDom consolePlayer = new CommandLineDom();
 		DomineeringMove m = consolePlayer.getMove();//Get move from player2(console)
 		board = (DomineeringBoard) board.play(m);
-		board.tree().firstPlayer(consolePlayer);
+		board.tree(0).firstPlayer(consolePlayer);
 	}
 
 	public static void main(String[] args) {
 		assert (args.length == 4);
 
 		DomineeringBoard board;
+		int width = Integer.parseInt(args[2]);
+		int height = Integer.parseInt(args[3]);
 		
 		switch(args[0]){
 			case "first":
 				switch(args[1]){
 					case "horizontal":
-						board = new DomineeringBoard(true, true, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
-						board.tree().firstPlayer(new CommandLineDom());
-					break;
+						// PLayerH starts
+						board = playOptimally(width, height) ? new DomineeringBoard(-1, true, true, width, height) : new DomineeringBoard(exploredLimit, true, true, width, height);
+						System.out.println("Benchmark Started making first board");
+						long time = System.currentTimeMillis();
+						board.tree(0);
+						time = System.currentTimeMillis() - time;
+						System.out.println("Benchmark Finished making first board");
+						System.out.println("Benchmark time " + time);
+						
+						System.out.println("Now making board for playing from scratch");
+						board.tree(0).firstPlayer(new CommandLineDom());
+						break;
 					case "vertical":
-						board = new DomineeringBoard(true, false, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
-						board.tree().firstPlayer(new CommandLineDom());
+						board = playOptimally(width, height) ? new DomineeringBoard(-1, true, false, width, height) : new DomineeringBoard(exploredLimit, true, false, width, height);// PLayerH starts
+						board.tree(0).firstPlayer(new CommandLineDom());
 						break;
 					default:
 						System.exit(1);	
@@ -62,15 +78,13 @@ public class BlackBoxDomineering2 {
 			case "second"://User starts so wait for first move THEN calculate possibilities
 				switch(args[1]){
 					case "horizontal":
-						board = new DomineeringBoard(false, true, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
-						//board.tree().secondPlayer(new CommandLineDom());
+						board = playOptimally(width, height) ? new DomineeringBoard(-1, false, true, width, height) : new DomineeringBoard(exploredLimit, false, true, width, height);// PLayerH starts
 						
 						//opponent moves first
 						letOpponentMove(board);
 					break;
 					case "vertical":
-						board = new DomineeringBoard(false, false, Integer.parseInt(args[2]), Integer.parseInt(args[3]));// PLayerH starts
-						//board.tree().secondPlayer(new CommandLineDom());
+						board = playOptimally(width, height) ? new DomineeringBoard(-1, false, false, width, height) : new DomineeringBoard(exploredLimit, false, false, width, height);// PLayerH starts
 						
 						//opponent moves first
 						letOpponentMove(board);
@@ -82,5 +96,15 @@ public class BlackBoxDomineering2 {
 			default:
 				System.exit(1);	
 		}
+	}
+	
+	/**
+	 * Only play optimally if the board is smaller than or equal to a certain size
+	 * @param boardWidth
+	 * @param boardHeight
+	 * @return
+	 */
+	private static boolean playOptimally(int boardWidth, int boardHeight) {
+		return boardWidth <= 4 && boardHeight <= 5 || boardWidth <= 5 && boardHeight <= 4;
 	}
 }

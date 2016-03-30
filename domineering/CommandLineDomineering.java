@@ -5,7 +5,7 @@ package domineering;
  * @author Szymon
  *
  */
-public class CommandLineDomineering{
+/*public class CommandLineDomineering{
 
 	private static class CommandLineDom implements MoveChannel<DomineeringMove> {
 		@Override
@@ -35,3 +35,4 @@ public class CommandLineDomineering{
 	     // board.tree().secondPlayer(new CommandLineDom());
 	  }
 }
+*/

@@ -10,10 +10,16 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 
 	/**
 	 * Available moves
+	 * Keeps track of nodes in which playerH can move
+	 * NOTE: Size of this set does not state the number of actual available moves!
 	 */
 	private final HashSet<DomineeringMove> availablePlayerHMovesSet;
 	private final HashSet<DomineeringMove> availablePlayerVMovesSet;
-
+	
+	/////////////////////////////////////////////////////////////////////////////////////////Heuristic pruning/////////////////////////////////////////////////////////////////////////////////////////	
+	private int noOfAvailableHMoves;
+	private int noOfAvailableVMoves;
+	
 	// Board2 representation as bool 2d array true - taken, false - free space
 	private boolean Board2[][];
 	private int width;
@@ -25,12 +31,17 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 	
 	/**
 	 * Create a new, empty Board2
-	 * 
+	 * @param playOptimally
+	 * @param exploredLimit
+	 * @param maximiserStarts
+	 * @param playerHMaximiser
 	 * @param width
 	 * @param height
 	 */
-	public DomineeringBoard(boolean maximiserStarts, boolean playerHMaximiser, int width, int height) {
-		//playerHTurn = playerHMaximiser; //The opposite so that when nextPlayer is called after the game starts the appropriate player will begin
+	public DomineeringBoard(int exploredLimit, boolean maximiserStarts, boolean playerHMaximiser, int width, int height) {
+		this.exploredLimit = exploredLimit;
+		exploredCount = 0;//At the beginning (creating first game board)
+		
 		setPlayerStatuses(maximiserStarts, playerHMaximiser);
 		
 		Board2 = new boolean[width][height];
@@ -39,24 +50,31 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 
 		availablePlayerHMovesSet = new HashSet<DomineeringMove>();
 		availablePlayerVMovesSet = new HashSet<DomineeringMove>();
-
+		
 		setUpAvailableMoves();
 	}
 
 	/**
 	 * Create the Board2 Used for creating new states i.e. moves
-	 * 
-	 * @param playerVMovesSet
-	 * @param playerHMovesSet
+	 * @param exploredLimit
+	 * @param exploredCount
+	 * @param maximiserStarts
+	 * @param playerHMaximiser
+	 * @param availablePlayerHMovesSet
+	 * @param availablePlayerVMovesSet
 	 * @param Board2
 	 * @param width
 	 * @param height
-	 * @param moveX1
-	 * @param moveY1
-	 * @param moveX2
-	 * @param moveY2
+	 * @param move
 	 */
-	private DomineeringBoard(boolean maximiserStarts, boolean playerHMaximiser, HashSet<DomineeringMove> availablePlayerHMovesSet,HashSet<DomineeringMove> availablePlayerVMovesSet, boolean[][] Board2, int width, int height, DomineeringMove move) {
+	private DomineeringBoard(int exploredLimit, int exploredCount, boolean maximiserStarts, boolean playerHMaximiser, 
+			HashSet<DomineeringMove> availablePlayerHMovesSet,HashSet<DomineeringMove> availablePlayerVMovesSet, 
+			boolean[][] Board2, int width, int height, DomineeringMove move) {
+		
+		this.exploredLimit = exploredLimit;
+		this.exploredCount = exploredCount;
+
+		
 		setPlayerStatuses(maximiserStarts, playerHMaximiser);
 		
 		this.availablePlayerHMovesSet = availablePlayerHMovesSet;
@@ -65,15 +83,16 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 		this.Board2 = Board2;
 		this.width = width;
 		this.height = height;
-		
-		//this.playerHTurn = playerHTurn;
 
 		// Playing a move
 		//For each move played 4 of the opposite available moves are removed and 3 of the same type
 		int moveX = move.getX();
 		int moveY = move.getY();
 		
-		if (nextPlayer() == playerH) {
+		//Also used further down
+		Player nextPlayer = nextPlayer();
+		
+		if (nextPlayer == playerH) {
 			Board2[moveX][moveY] = true;// Add new move
 			Board2[moveX + 1][moveY] = true;
 			
@@ -109,8 +128,40 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 		
 		assert(availablePlayerHMovesSet.contains(move) == false);//availablePlayerHMovesSet contains taken first dominoe half?
 		assert(availablePlayerVMovesSet.contains(move) == false);//availablePlayerVMovesSet contains taken first dominoe half?
+	
+		/////////////////////////////////////////////////////////////////////////////////////////Updating number of possible moves for both players/////////////////////////////////////////////////////////////////////////////////////////
+		//NAIVE COUNTING METHOD - GURANTEED TO WORK
+		if(!playOptimally())//Have to use heuristics
+			countAvailableMoves();
 	}
 	
+	private void countAvailableMoves() {
+		noOfAvailableHMoves = 0;
+		noOfAvailableVMoves = 0;
+		//Have to count separately H & V moves
+		//H moves
+		for (int y = 0; y < height; y++){
+			for (int x = 0; x < width - 1; x++){
+				if (!Board2[x][y] && !Board2[x + 1][y]){
+					noOfAvailableHMoves++;
+					x++;//Results in skipping counted move
+					continue;
+				}
+			}
+		}
+		
+		//V moves
+		for (int x = 0; x < width; x++){
+			for (int y = 0; y < height - 1; y++){
+				if (!Board2[x][y] && !Board2[x][y + 1]){
+					noOfAvailableVMoves++;
+					y++;//Results in skipping counted move
+					continue;
+				}
+			}
+		}
+	}
+
 	private void setPlayerStatuses(boolean maximiserStarts, boolean playerHMaximiser){
 		this.maximiserStarts = maximiserStarts;
 		this.playerHMaximiser = playerHMaximiser;
@@ -153,7 +204,6 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 					return playerH;
 				}
 			}
-			//return playerHMaximiser ? playerH : playerV;//First player
 		}
 		else{
 			if(playerHMaximiser){
@@ -172,7 +222,6 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 					return playerV;
 				}
 			}
-			//return playerHMaximiser ? playerV : playerH;//Second player
 		}
 	}
 
@@ -182,6 +231,9 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 	}
 
 	void setUpAvailableMoves() {
+		noOfAvailableHMoves = Math.floorDiv(width, 2) * height;
+		noOfAvailableVMoves = Math.floorDiv(height, 2) * width;
+		
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				/*if (Board2[i][j]) {// Any move not possible at this position
@@ -196,17 +248,30 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 			}
 		}
 	}
-
+	
+	/**
+	 * Used in conjuction with value when using heuristics (playing non-optimally)
+	 * @return has the game ended (either player lost)
+	 */
+	@Override
+	public boolean gameOver(){
+		return availablePlayerHMovesSet.size() > 0 && availablePlayerVMovesSet.size() > 0 ? false : true;
+	}
+	
 	@Override
 	/**
 	 * Returns the value of the game state heuristic for the current player
-	 * 
+	 * NOTE: Only called at the leaf node / exploredLimit
 	 * @return
 	 */
 	int value() {// Maximizer won(1) lost (-1)
-		//assert (nextPlayer() == Player.MINIMIZER);// Only maximiser calls this?
 		if(availablePlayerHMovesSet.size() > 0 && availablePlayerVMovesSet.size() > 0) {
-			return 0;
+			if(playOptimally())
+				return 0;
+			
+			if(playerHMaximiser)
+				return noOfAvailableHMoves - noOfAvailableVMoves;
+			return noOfAvailableVMoves - noOfAvailableHMoves;
 		}
 		else if(nextPlayer() == playerH){
 			if(playerHMaximiser && availablePlayerHMovesSet.size() == 0){
@@ -220,29 +285,13 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 			}
 			return -1;
 		}
-		
-
-		// TODO May be used for heuristic pruning
-		/*
-		 * int heuristic;
-		 * 
-		 * if(nextPlayer().equals(playerV)){ heuristic =
-		 * availablePlayerHMovesSet.size() - availablePlayerVMovesSet.size(); }
-		 * else { heuristic = availablePlayerVMovesSet.size() -
-		 * availablePlayerHMovesSet.size(); }
-		 * 
-		 * if(heuristic > 0){//Current player has more available moves return 1;
-		 * } else if(heuristic == 0){//Current player has the same no. of
-		 * available moves return 0; } else {//Current player has less available
-		 * moves return -1; }
-		 */
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	Board2<DomineeringMove> play(DomineeringMove move) {
 		boolean newBoard2Rep[][] = deepCopyBoard2();
-		Board2<DomineeringMove> tempBoard2 = new DomineeringBoard(maximiserStarts, playerHMaximiser, (HashSet<DomineeringMove>) availablePlayerHMovesSet.clone(), (HashSet<DomineeringMove>) availablePlayerVMovesSet.clone(), newBoard2Rep, width, height, move);
+		Board2<DomineeringMove> tempBoard2 = new DomineeringBoard(exploredLimit, exploredCount, maximiserStarts, playerHMaximiser, (HashSet<DomineeringMove>) availablePlayerHMovesSet.clone(), (HashSet<DomineeringMove>) availablePlayerVMovesSet.clone(), newBoard2Rep, width, height, move);
 		
 		assert(this.availableMoves().contains(move));//this contains move(not mutated) 
 		assert(!tempBoard2.availableMoves().contains(move));
@@ -303,4 +352,118 @@ public class DomineeringBoard extends Board2<DomineeringMove> {
 		c.retainAll(b);
 		return c;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//THE FOLOWING CHECKS MAY FAIL AND ARE LESS EFFICIENT!, TURN TO THE NAIVE COUNTING METHOD(THIS CAN TAKE MORE STEPS ON LARGE MAPS)
+			//Types of cut offs (only one version shown e.g. can be rotated)
+			// + 	: occupied node
+			// * 	: free node
+			// ___ 	: placed move (horizontal in the examples) that provides cut offs
+			
+			//KISSINGPIRATES - check for first as they are formed by 2 PIRATE cut offs
+			// + *
+			// ___
+			//
+			// * +
+			
+			//PIRATE
+			// + *
+			// ___
+			
+			//LONGFACE
+			// * *
+			// ___
+			/*
+			if (nextPlayer == playerH) {
+				//First check if player cut off himself
+				if(moveX > 0 && moveX < width - 2 && !Board2[moveX - 1][moveY] && !Board2[moveX + 2][moveY]){
+					noOfAvailableHMoves -= 2;//Player cut off himself
+				}
+				else {
+					noOfAvailableHMoves--;
+				}
+				
+				//Now check if the player cut off opponent's moves
+				//First check special case - special case allows to make a move without cutting off anything
+				/*if(height % 2 != 0 && (moveY == 0 || moveY == height - 1)){//odd height
+					if(moveY == 0){//Count number of possible moves after move and deduce the cut off quantity
+						if (!Board2[moveX][moveY + 1] && !Board2[moveX + 1][moveY + 1])//if not both nodes occupied under new board(move)
+						{
+							int y = 2;
+							int x = 0;
+							int stopExploringAtCullumn = 2;
+							if(Board2[moveX][moveY + 1]){//Only left node occupied under new board(move) therefore did not cut off any moves on the left
+								x = 1;
+							}
+							else if(Board2[moveX + 1][moveY + 1]){//Only right node occupied under new board(move) therefore did not cut off any moves on the right
+								stopExploringAtCullumn = 1;
+							}
+							/*else{//Both nodes under are free
+								
+							}*/
+							
+							/*for (; x < stopExploringAtCullumn; x++){
+								for (; y < height - 1; y++){
+									
+								}
+							}
+						}
+					}
+					else {
+						
+					}
+					
+				}
+				//Checking for KISSINGPIRATES & LONGFACE - provide 2 cut offs
+				else*/ /*if (moveX < width - 1 && moveY > 0 && moveY < height - 1 && !Board2[moveX][moveY - 1] && Board2[moveX + 1][moveY - 1] && Board2[moveX][moveY + 1] && !Board2[moveX + 1][moveY + 1]
+						|| moveY > 0 && moveX < width - 1 && moveY < height - 1 && Board2[moveX][moveY - 1] && !Board2[moveX + 1][moveY - 1] && !Board2[moveX][moveY + 1] && Board2[moveX + 1][moveY + 1]
+						//LONGFACE
+						|| moveY > 0 && moveX < width - 1 && !Board2[moveX][moveY - 1] && !Board2[moveX + 1][moveY - 1]
+						|| moveX < width - 1 && moveY < height - 1 && !Board2[moveX][moveY + 1] && !Board2[moveX + 1][moveY + 1]){
+					noOfAvailableVMoves -= 2;
+				}
+				//PIRATE provides 1 cut off, no other scenarios possible
+				else{
+					noOfAvailableVMoves--;
+				}
+				
+			}else{
+				//First check if player cut off himself
+				if(moveY > 0 && moveY < height - 2 && !Board2[moveX][moveY - 1] && !Board2[moveX][moveY + 2]){
+					noOfAvailableVMoves -= 2;//Player cut off himself
+				}
+				else {
+					noOfAvailableVMoves--;
+				}
+				
+				if (moveX > 0 && moveY < height - 1 && moveX < width - 1 && Board2[moveX - 1][moveY] && !Board2[moveX - 1][moveY + 1] && !Board2[moveX + 1][moveY] && Board2[moveX + 1][moveY + 1]
+						|| moveX > 0 && moveY < height - 1 && moveX < width - 1 && !Board2[moveX - 1][moveY] && Board2[moveX - 1][moveY + 1] && Board2[moveX + 1][moveY] && !Board2[moveX + 1][moveY + 1]
+						//LONGFACE
+						|| moveX > 0 && moveY < height - 1 && !Board2[moveX - 1][moveY] && !Board2[moveX - 1][moveY + 1]
+						|| moveX < width - 1 && moveY < height - 1 && !Board2[moveX + 1][moveY] && !Board2[moveX + 1][moveY + 1]){
+					noOfAvailableVMoves -= 2;
+				}
+				//PIRATE provides 1 cut off, no other scenarios possible
+				else{
+					noOfAvailableVMoves--;
+				}
+				 
+			}*/
 }
