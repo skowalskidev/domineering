@@ -40,10 +40,15 @@ public abstract class Board2<Move> {
 			children.put(m, subtree);
 			optimalOutcome = Math.max(optimalOutcome, subtree.optimalOutcome());
 			if(playOptimally()){
-				if(optimalOutcome == 1)
+				if(optimalOutcome == 1){
+					children.clear();
+					children.put(m, subtree);
 					break;
+				}
 			}
 			else if(optimalOutcome >= 2){
+				children.clear();
+				children.put(m, subtree);
 				break;
 			}	
 		}
